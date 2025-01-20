@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 public class Health : MonoBehaviour
@@ -9,9 +10,14 @@ public class Health : MonoBehaviour
     private float regenDelay = 3f;
     private float regenRate = 10f;
 
+    private GameObject damageNumberPrefab;
+    [SerializeField] private Vector3 damageNumberOffset = Vector3.up;
+
     void Start()
     {
         currentHealth = maxMealth;
+
+        damageNumberPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DamageNumbers.prefab");
     }
 
     void Update()
@@ -26,10 +32,12 @@ public class Health : MonoBehaviour
     
     public void TakeDamage(float damage)
     {
-        Debug.Log(damage + " " + gameObject.name);
+        //Debug.Log(damage + " " + gameObject.name);
 
         currentHealth -= damage;
         timeSinceLastHit = 0f;
+        
+        Instantiate(damageNumberPrefab, transform.position + damageNumberOffset, Quaternion.identity).GetComponentInChildren<DamageNumber>().SetDamage(damage);
         
         if (currentHealth <= 0f)
         {

@@ -9,7 +9,7 @@ public class Fireball : MonoBehaviour
     private float damage = 90f;
     private float projectileSpeed = 15f;
     
-    public LayerMask groundlayer;
+    [SerializeField] private LayerMask interactableLayer;
     
     void Start()
     {
@@ -34,7 +34,7 @@ public class Fireball : MonoBehaviour
             health.TakeDamage(damage);
         }
         
-        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 100f, groundlayer);
+        Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 100f, interactableLayer);
         Instantiate(aoePrefab, hit.point, Quaternion.identity);
     
         Destroy(gameObject);

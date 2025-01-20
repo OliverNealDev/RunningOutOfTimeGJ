@@ -246,10 +246,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 2560, y: 1440}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -759,7 +759,7 @@ GameObject:
   - component: {fileID: 1056439657}
   - component: {fileID: 1056439661}
   - component: {fileID: 1056439662}
-  m_Layer: 12
+  m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -773,7 +773,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1056439656}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 38d81bad46a9a9148b2fbc69e7b884bf, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -868,6 +868,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMealth: 100
+  damageNumberOffset: {x: 0, y: 2.5, z: 0}
 --- !u!114 &1056439662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1069,6 +1070,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMealth: 100
+  damageNumberOffset: {x: 0, y: 2.5, z: 0}
 --- !u!65 &1688517358
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1191,6 +1193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMealth: 100
+  damageNumberOffset: {x: 0, y: 2.5, z: 0}
 --- !u!65 &2065817924
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1198,7 +1201,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2065817922}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 38d81bad46a9a9148b2fbc69e7b884bf, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

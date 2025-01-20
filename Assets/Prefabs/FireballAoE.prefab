@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 153308395677219886}
   - component: {fileID: 2764491757448841471}
   - component: {fileID: -7600923535430570701}
-  - component: {fileID: 8730769473575324510}
+  - component: {fileID: -7228935609312612747}
+  - component: {fileID: -6987104665934243278}
   m_Layer: 2
   m_Name: FireballAoE
   m_TagString: Untagged
@@ -100,8 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcf8c6b468b7d3a43bef16fc3b0e89bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healths: []
---- !u!64 &8730769473575324510
+--- !u!64 &-7228935609312612747
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -123,3 +123,30 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &-6987104665934243278
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2595022013238745788}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0

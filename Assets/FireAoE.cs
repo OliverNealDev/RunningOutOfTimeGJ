@@ -1,42 +1,40 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FireAoE : MonoBehaviour
 {
     private float tickRate = 1f;
-    private float timeSinceLastHit;
     private float lifetime = 10f;
     
-    [SerializeField] private List<Health> healths = new List<Health>();
+    [SerializeField] private LayerMask interactableLayer;
 
+    private List<Health> healths = new List<Health>();
+    
     void Start()
     {
         Invoke(nameof(Timeout), lifetime);
+        InvokeRepeating(nameof(ApplyDamage), 0, tickRate);
     }
 
     void Timeout()
     {
         Destroy(gameObject);
     }
-    
-    void Update()
-    {
-        timeSinceLastHit += Time.deltaTime;
-        if (timeSinceLastHit >= tickRate)
-        {
-            LogicTickRate();
-        }
-    }
 
-    void LogicTickRate()
+    void ApplyDamage()
     {
         foreach (Health health in healths)
         {
-            health.TakeDamage(10f);
+            //This is the silly num check that's tells me to do a null check
+            if (health is not null)
+            {
+                health.TakeDamage(10f);
+            }
         }
     }
-    
-    /*void OnTriggerEnter(Collider other)
+
+    void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out Health health))
         {
@@ -50,5 +48,5 @@ public class FireAoE : MonoBehaviour
         {
             healths.Remove(health);
         }
-    }*/
+    }
 }
