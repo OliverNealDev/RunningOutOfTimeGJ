@@ -6,7 +6,7 @@ public class EnemyManager : MonoBehaviour
     public GameObject meleeEnemyPrefab;
     
     public GameObject rangedEnemyPrefab;
-    public GameObject stomperEnemyPrefab; // does these stomps or attacks that hit everything around it
+    public GameObject stomperEnemyPrefab; // does these stomps or attacks that hit everything around it?
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
