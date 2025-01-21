@@ -1,57 +1,60 @@
+using System.Collections;
 using UnityEditor;
 using UnityEngine;
 
-public enum RightHandAbility
-{
-    Gun,
-    Fireball,
-}
-
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerCharacter : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float walkSpeed = 5f;         // Walking movement speed
-    public float runSpeed = 8f;         // Running speed
-    public float acceleration = 10f;    // Movement acceleration
-    public float deceleration = 10f;    // Movement deceleration
-    public float jumpForce = 50f;        // Force applied for jumping
-
-    [Header("Physics Settings")]
-    public float gravityMultiplier = 9.81f; // Multiplier for stronger gravity
-    public float groundCheckDistance = 0.9f; // Distance to check if grounded
-    public LayerMask groundMask;         // Layers considered as "Ground"
+    [SerializeField] private float walkSpeed = 5f;             // Walking movement speed
+    //[SerializeField] private float runSpeed = 8f;              // Running speed
+    [SerializeField] private float jumpForce = 4f;           // Force applied for jumping
+    [SerializeField] private float groundCheckDistance = 1.2f;
+    [SerializeField] private LayerMask groundMask;
+    private bool isGrounded;                                   // Check whether player is grounded
+    private Vector3 jumpingVelocity;
 
     [Header("Mouse Look Settings")]
-    public float lookSensitivity = 2f;  // Mouse sensitivity for smooth look
-    public float verticalLookLimit = 85f; // Limit for looking up/down vertically
+    [SerializeField] private float lookSensitivity = 2f;       // Mouse sensitivity for smooth look
+    [SerializeField] private float verticalLookLimit = 85f;    // Limit for looking up/down vertically
+    private float verticalLookRotation;
 
-    private Rigidbody rb;                // Rigidbody for physics-based movement
-    private Transform cameraTransform;   // Reference to the player's camera
-    private Vector3 desiredVelocity;     // Target velocity based on input
-    private bool isGrounded;             // Check whether player is grounded
-    private float originalDrag;          // Store Rigidbody's default drag value
-    private float verticalLookRotation;  // Tracks current vertical view angle
+    private CharacterController controller;
+    private Rigidbody rb;                                      // Rigidbody for physics-based movement
+    private Transform cameraTransform;                         // Reference to the player's camera
+    private Animator animator;
     
     [SerializeField] private LayerMask enemyLayer;
     
+    [SerializeField] private GameObject leftHandObject;
+    
+    
     //Melee Ability
     private bool hasMeleeAbility = true;
+    private bool activeMelee;
     [SerializeField] private float meleeDamage = 70f;
     
     //Fireball Ability
     private bool hasFireballAbility = true;
+    private bool activeFireball;
     private GameObject fireball;
     
     //Trioball Ability
     private bool hasTrioballAbility = true;
+    private bool activeTrio;
     private GameObject trioball;
+    
+    //Pistol Ability
+    private bool hasPistolAbility = true;
 
     void Start()
     {
         // References
+        controller = GetComponent<CharacterController>();
         rb = GetComponent<Rigidbody>();
         cameraTransform = Camera.main.transform;
+        animator = GetComponentInChildren<Animator>();
 
         fireball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Fireball.prefab");
         trioball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Trioball.prefab");
@@ -59,28 +62,28 @@ public class PlayerCharacter : MonoBehaviour
         // Lock cursor for FPS-style camera controls
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        // Maintain drag for smooth deceleration
-        originalDrag = rb.linearDamping;
-
-        // Better gravity simulation
-        rb.useGravity = false;
     }
 
     void Update()
     {
+        CheckGrounded();
+        HandleMovement();
         HandleMouseLook();
         HandleJump();
-        CheckGrounded();
         
-        if (Input.GetKeyDown(KeyCode.V) && hasMeleeAbility)
+        if (Input.GetKeyDown(KeyCode.V) && hasMeleeAbility && !activeMelee)
         {
-            MeleeAttack();
+            StartCoroutine(MeleeAttack());
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && hasFireballAbility)
+        if (Input.GetKeyDown(KeyCode.Mouse1) && hasTrioballAbility && !activeTrio)
         {
-            RangedAttack();
+            StartCoroutine(AltRangedAttack());
+        }
+
+        if (Input.GetKeyDown(KeyCode.Mouse0) && hasPistolAbility)
+        {
+            
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -88,42 +91,26 @@ public class PlayerCharacter : MonoBehaviour
             hasMeleeAbility = !hasMeleeAbility;
         }
         
-        if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility)
+        if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility && !activeFireball)
         {
-            Fireball();
+            StartCoroutine(Fireball());
         }
-    }
-
-    void FixedUpdate()
-    {
-        HandleMovement();
-        ApplyAdditionalGravity();
-        
     }
 
     void HandleMovement()
     {
         // Capture input (Keyboard: WASD / Arrow Keys)
-        float inputHorizontal = Input.GetAxis("Horizontal");
-        float inputVertical = Input.GetAxis("Vertical");
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
-
-        // Calculate movement inputs relative to direction player is facing
-        Vector3 moveDirection = transform.right * inputHorizontal + transform.forward * inputVertical;
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+        //bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // Scale movement speed based on running or walking
-        float targetSpeed = (isRunning ? runSpeed : walkSpeed);
+        float currentSpeed = walkSpeed;  //(isRunning ? runSpeed : walkSpeed);
+        
+        // Calculate movement inputs relative to direction player is facing
+        Vector3 move = transform.right * moveX * currentSpeed + transform.forward * moveZ * currentSpeed;
 
-        // Gradually adjust velocity using acceleration
-        desiredVelocity = moveDirection.normalized * targetSpeed;
-        if (isGrounded)
-        {
-            rb.linearVelocity = desiredVelocity;
-        }
-        else
-        {
-            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z), Time.fixedDeltaTime * (isGrounded ? acceleration : deceleration));
-        }
+        controller.Move(move * Time.deltaTime);
     }
 
     void HandleMouseLook()
@@ -140,58 +127,74 @@ public class PlayerCharacter : MonoBehaviour
         verticalLookRotation = Mathf.Clamp(verticalLookRotation, -verticalLookLimit, verticalLookLimit);
         cameraTransform.localRotation = Quaternion.Euler(verticalLookRotation, 0f, 0f);
     }
+    
+    void CheckGrounded()
+    {
+        // Perform ground detection using a SphereCast
+        isGrounded = Physics.CheckSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f, groundMask);
+    }
+    
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f);
+    }
 
     void HandleJump()
     {
         // Listen for Jump input and ensure the player is grounded
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // Reset Y velocity to prevent double jumps
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            jumpingVelocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
         }
+        
+        jumpingVelocity.y += Physics.gravity.y * Time.deltaTime;
+        controller.Move(jumpingVelocity * Time.deltaTime);
     }
 
-    void ApplyAdditionalGravity()
+    private IEnumerator MeleeAttack()
     {
-        // Apply stronger gravity manually to achieve a better feel
-        if (!isGrounded)
-        {
-            rb.AddForce(Vector3.down * gravityMultiplier, ForceMode.Acceleration);
-        }
-    }
+        animator.Play("Melee", 0, 0);
 
-    void CheckGrounded()
-    {
-        // Perform ground detection using a SphereCast
-        isGrounded = Physics.CheckSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f, groundMask);
-
-        // Modify drag to simulate sticky landing or sliding off
-        rb.linearDamping = isGrounded ? originalDrag : 0f;
-    }
-
-    private void MeleeAttack()
-    {
+        activeMelee = true;
+        
+        yield return new WaitForSeconds(3f / 24f);
+        
         RaycastHit[] hits = Physics.SphereCastAll(cameraTransform.position, 1f, Vector3.forward, 1f, enemyLayer);
         foreach (RaycastHit hit in hits)
         {
             hit.collider.TryGetComponent(out Health health);
             health.TakeDamage(meleeDamage);
         }
+        
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        activeMelee = false;
     }
     
-    private void RangedAttack()
+    private IEnumerator AltRangedAttack()
     {
-        Instantiate(trioball, cameraTransform.position, cameraTransform.rotation);
+        animator.Play("Fireball", 0, 0);
+        activeTrio = true;
+        
+        yield return new WaitForSeconds(9f / 24f);
+
+        Instantiate(trioball, leftHandObject.transform.position, cameraTransform.rotation);
+        
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        activeTrio = false;
+        
     }
 
-    private void Fireball()
+    private IEnumerator Fireball()
     {
-        Instantiate(fireball, cameraTransform.position, cameraTransform.rotation);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f);
+        animator.Play("Fireball", 0, 0);
+        activeFireball = true;
+        
+        yield return new WaitForSeconds(9f / 24f);
+        
+        Instantiate(fireball, leftHandObject.transform.position, cameraTransform.rotation);
+        
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        activeFireball = false;
     }
 }
