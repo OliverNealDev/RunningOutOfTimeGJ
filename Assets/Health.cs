@@ -37,7 +37,7 @@ public class Health : MonoBehaviour
         currentHealth -= damage;
         timeSinceLastHit = 0f;
         
-        Instantiate(damageNumberPrefab, transform.position + damageNumberOffset, Quaternion.identity).GetComponentInChildren<DamageNumber>().SetDamage(damage);
+        Instantiate(damageNumberPrefab, transform.position + damageNumberOffset, Quaternion.identity).GetComponentInChildren<DamageNumber>().Initialise(gameObject, damage);
         
         if (currentHealth <= 0f)
         {

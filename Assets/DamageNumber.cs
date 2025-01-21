@@ -11,6 +11,8 @@ public class DamageNumber : MonoBehaviour
     [SerializeField] private TextMeshPro text;
     
     private Camera cam;
+
+    private GameObject owner;
     
     private float damage;
 
@@ -23,7 +25,7 @@ public class DamageNumber : MonoBehaviour
         {
             foreach (Collider coll in size)
             {
-                if (coll.TryGetComponent(out DamageNumber damageNumber))
+                if (coll.TryGetComponent(out DamageNumber damageNumber) && damageNumber.owner == owner)
                 {
                     if (damageNumber.GetHashCode() > GetHashCode())
                     {
@@ -39,7 +41,13 @@ public class DamageNumber : MonoBehaviour
         transform.position += new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(0, 0.25f), Random.Range(-0.5f, 0.5f));
     }
 
-    public void SetDamage(float damage)
+    public void Initialise(GameObject owner, float damage)
+    {
+        this.owner = owner;
+        SetDamage(damage);
+    }
+
+    void SetDamage(float damage)
     {
         this.damage = damage;
         text.text = damage.ToString();
