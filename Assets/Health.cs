@@ -32,8 +32,6 @@ public class Health : MonoBehaviour
     
     public void TakeDamage(float damage)
     {
-        //Debug.Log(damage + " " + gameObject.name);
-
         currentHealth -= damage;
         timeSinceLastHit = 0f;
         

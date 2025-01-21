@@ -24,19 +24,6 @@ public class FireAoE : MonoBehaviour
         Destroy(gameObject);
     }
 
-    /*void Update()
-    {
-        timeWhenLastHit += Time.deltaTime;
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (timeWhenLastHit > tickRate && other.TryGetComponent(out Health health))
-        {
-            health.TakeDamage(10f);
-        }
-    }*/
-
     void ApplyDamage()
     {
         foreach (Health health in healths)

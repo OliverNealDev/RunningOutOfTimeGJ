@@ -41,6 +41,11 @@ public class DamageNumber : MonoBehaviour
         transform.position += new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(0, 0.25f), Random.Range(-0.5f, 0.5f));
     }
 
+    /// <summary>
+    /// Call this function when spawning a DamageNumber object.
+    /// </summary>
+    /// <param name="owner"></param>
+    /// <param name="damage"></param>
     public void Initialise(GameObject owner, float damage)
     {
         this.owner = owner;
@@ -60,16 +65,13 @@ public class DamageNumber : MonoBehaviour
 
     void Merge(float newDamage)
     {
-        //Debug.Log(damage + " merging...");
         SetDamage(newDamage + damage);
-        //Debug.Log(damage + " merged!");
         animator.Play(anim.name, 0, 0);;
     }
     
     //Called in Animation
     public void Destroy()
     {
-        Debug.Log("Destroying... " + damage);
         Destroy(transform.parent.gameObject);
     }
 }

@@ -3,11 +3,23 @@ using UnityEngine;
 public class Trioball : MonoBehaviour
 {
     private Rigidbody rigidBody;
+    
+    [SerializeField] private float lifetime = 10f;
 
     private int ballCount = 3;
     
     [SerializeField] private float projectileSpeed = 15f;
 
+    void Start()
+    {
+        Invoke(nameof(Timeout), lifetime);    
+    }
+
+    void Timeout()
+    {
+        Destroy(gameObject);
+    }
+    
     void Update()
     {
         transform.Translate(Vector3.forward * Time.deltaTime * projectileSpeed);

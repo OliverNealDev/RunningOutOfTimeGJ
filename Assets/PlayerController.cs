@@ -116,7 +116,14 @@ public class PlayerCharacter : MonoBehaviour
 
         // Gradually adjust velocity using acceleration
         desiredVelocity = moveDirection.normalized * targetSpeed;
-        rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z), Time.fixedDeltaTime * (isGrounded ? acceleration : deceleration));
+        if (isGrounded)
+        {
+            rb.linearVelocity = desiredVelocity;
+        }
+        else
+        {
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z), Time.fixedDeltaTime * (isGrounded ? acceleration : deceleration));
+        }
     }
 
     void HandleMouseLook()

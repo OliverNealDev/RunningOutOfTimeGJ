@@ -2,15 +2,23 @@ using UnityEngine;
 
 public class MeleeEnemy : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private Animator animator;
+    private Rigidbody rb;
+
+    [SerializeField] private float speed = 100f;
+    
+    
+    
     void Start()
     {
-        
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        Vector3 currentVelocity = rb.linearVelocity;
+        rb.linearVelocity = Vector3.SmoothDamp(rb.linearVelocity, transform.forward * speed, ref currentVelocity, speed);
+        animator.SetFloat("Speed", currentVelocity.magnitude);
     }
 }
