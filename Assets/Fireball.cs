@@ -35,7 +35,12 @@ public class Fireball : MonoBehaviour
         }
         
         Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 100f, interactableLayer);
-        Instantiate(aoePrefab, hit.point, Quaternion.identity);
+        Vector3 aoeSpawn = hit.point;
+        if (hit.point == Vector3.zero)
+        {
+            aoeSpawn = transform.position;
+        }
+        Instantiate(aoePrefab, aoeSpawn, Quaternion.identity);
     
         Destroy(gameObject);
     }

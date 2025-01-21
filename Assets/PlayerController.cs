@@ -42,6 +42,10 @@ public class PlayerCharacter : MonoBehaviour
     //Fireball Ability
     private bool hasFireballAbility = true;
     private GameObject fireball;
+    
+    //Trioball Ability
+    private bool hasTrioballAbility = true;
+    private GameObject trioball;
 
     void Start()
     {
@@ -50,6 +54,7 @@ public class PlayerCharacter : MonoBehaviour
         cameraTransform = Camera.main.transform;
 
         fireball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Fireball.prefab");
+        trioball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Trioball.prefab");
 
         // Lock cursor for FPS-style camera controls
         Cursor.lockState = CursorLockMode.Locked;
@@ -169,13 +174,12 @@ public class PlayerCharacter : MonoBehaviour
     
     private void RangedAttack()
     {
-        
+        Instantiate(trioball, cameraTransform.position, cameraTransform.rotation);
     }
 
     private void Fireball()
     {
         Instantiate(fireball, cameraTransform.position, cameraTransform.rotation);
-
     }
 
     private void OnDrawGizmos()

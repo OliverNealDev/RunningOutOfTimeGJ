@@ -8,6 +8,8 @@ public class FireAoE : MonoBehaviour
     private float lifetime = 10f;
     
     [SerializeField] private LayerMask interactableLayer;
+    
+    private float timeWhenLastHit;
 
     private List<Health> healths = new List<Health>();
     
@@ -22,12 +24,25 @@ public class FireAoE : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /*void Update()
+    {
+        timeWhenLastHit += Time.deltaTime;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (timeWhenLastHit > tickRate && other.TryGetComponent(out Health health))
+        {
+            health.TakeDamage(10f);
+        }
+    }*/
+
     void ApplyDamage()
     {
         foreach (Health health in healths)
         {
             //This is the silly num check that's tells me to do a null check
-            if (health is not null)
+            if (health != null)
             {
                 health.TakeDamage(10f);
             }
