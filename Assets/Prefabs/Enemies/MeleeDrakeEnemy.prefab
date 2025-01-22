@@ -461,7 +461,7 @@ GameObject:
   - component: {fileID: 6790552262565566132}
   - component: {fileID: 444812300149337023}
   m_Layer: 12
-  m_Name: DrakeEnemy
+  m_Name: MeleeDrakeEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

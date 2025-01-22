@@ -1,7 +1,7 @@
 using Unity.AI.Navigation;
 using UnityEngine;
 
-public class MeleeEnemy : MonoBehaviour
+public class RangedEnemey : MonoBehaviour
 {
     private Animator animator;
     private Rigidbody rb;
@@ -9,9 +9,9 @@ public class MeleeEnemy : MonoBehaviour
 
     [SerializeField] private float speed = 100f;
     
-    private enum meleeEnemyState {/*Patrol, */Chasing, Attacking}
+    private enum rangedEnemyState {/*Patrol, */Positioning, Attacking}
 
-    [SerializeField] private meleeEnemyState currentMeleeEnemyState;
+    [SerializeField] private rangedEnemyState currentRangedEnemyState;
     
     //Navmesh
     [SerializeField] private NavMeshSurface surface;
@@ -38,7 +38,7 @@ public class MeleeEnemy : MonoBehaviour
 
     void FixedUpdate() // changed to sync with physics tickrate because velocity calculaations
     {
-        switch (currentMeleeEnemyState)
+        switch (currentRangedEnemyState)
         {
             /*case meleeEnemyState.Patrol:
                 if (agent.pathStatus != UnityEngine.AI.NavMeshPathStatus.PathComplete)
@@ -54,25 +54,33 @@ public class MeleeEnemy : MonoBehaviour
                     agent.velocity = direction * speed;
                 }
                 break;*/
-            case meleeEnemyState.Chasing:
+            case rangedEnemyState.Positioning:
                 if (agent.destination != Playertarget.position)
                 {
-                    agent.destination = Playertarget.position; 
-                    
-                    if (Vector3.Distance(transform.position, Playertarget.position) <= 2f)
+                    if (Vector3.Distance(transform.position, Playertarget.position) >= 5f && Vector3.Distance(transform.position, Playertarget.position) <= 10f)
                     {
-                        currentMeleeEnemyState = meleeEnemyState.Attacking;
+                        currentRangedEnemyState = rangedEnemyState.Attacking;
                         agent.velocity = Vector3.zero;
+                    }
+                    else if (Vector3.Distance(transform.position, Playertarget.position) >= 10f)
+                    {
+                        agent.destination = Playertarget.position; 
+                        
+                        Vector3 direction = (agent.destination - transform.position).normalized;
+                        agent.velocity = direction * speed;
                     }
                     else
                     {
+                        Vector3 Awaydirection = (transform.position - Playertarget.position).normalized;
+                        agent.destination = Playertarget.position + Awaydirection * 10;
+                        
                         Vector3 direction = (agent.destination - transform.position).normalized;
                         agent.velocity = direction * speed;
                     }
                 }
                 break;
-            case meleeEnemyState.Attacking:
-                if (Vector3.Distance(transform.position, Playertarget.position) <= 2f)
+            case rangedEnemyState.Attacking:
+                if (Vector3.Distance(transform.position, Playertarget.position) >= 5f && Vector3.Distance(transform.position, Playertarget.position) <= 10f)
                 {
                     attackTimer += Time.fixedDeltaTime;
                     if (attackTimer >= attackCooldown)
@@ -83,12 +91,12 @@ public class MeleeEnemy : MonoBehaviour
                 }
                 else
                 {
-                    currentMeleeEnemyState = meleeEnemyState.Chasing;
+                    currentRangedEnemyState = rangedEnemyState.Positioning;
                 }
                 break;
         }
 
-        if (currentMeleeEnemyState == meleeEnemyState.Attacking)
+        if (currentRangedEnemyState == rangedEnemyState.Attacking)
         {
             transform.LookAt(Playertarget);
         }
