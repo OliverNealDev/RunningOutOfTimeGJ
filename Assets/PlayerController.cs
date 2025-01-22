@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterController))]
-public class PlayerCharacter : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed = 5f;             // Walking movement speed
@@ -72,6 +72,8 @@ public class PlayerCharacter : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale == 0f) return;
+        
         CheckGrounded();
         HandleMovement();
         HandleMouseLook();
@@ -90,11 +92,6 @@ public class PlayerCharacter : MonoBehaviour
         if (Input.GetKey(KeyCode.Mouse0) && hasPistolAbility && !activePistol)
         {
             StartCoroutine(PistolAttack());
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            hasMeleeAbility = !hasMeleeAbility;
         }
         
         if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility && !activeFireball)
@@ -156,6 +153,28 @@ public class PlayerCharacter : MonoBehaviour
         
         jumpingVelocity.y += Physics.gravity.y * Time.deltaTime;
         controller.Move(jumpingVelocity * Time.deltaTime);
+    }
+
+    public void ToggleAbility(bool active, int index)
+    {
+        switch (index)
+        {
+            case 1:
+                hasMeleeAbility = active;
+                break;
+            case 2:
+                hasFireballAbility = active;
+                break;
+            case 3:
+                
+                break;
+            case 4:
+                hasPistolAbility = active;
+                break;
+            case 5: 
+                hasTrioballAbility = active;
+                break;
+        }
     }
 
     private IEnumerator MeleeAttack()
@@ -233,7 +252,7 @@ public class PlayerCharacter : MonoBehaviour
         Physics.Raycast(cameraTransform.position, cameraTransform.forward, out RaycastHit hit, 100f, enemyLayer + groundLayer);
         if (hit.collider.TryGetComponent(out Health health))
         {
-            health.TakeDamage(pistolDamage);
+            health?.TakeDamage(pistolDamage);
         }
         
         yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length * 0.5f);

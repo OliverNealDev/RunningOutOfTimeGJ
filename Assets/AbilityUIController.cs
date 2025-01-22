@@ -1,5 +1,5 @@
-using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +14,13 @@ public class AbilityUIController : MonoBehaviour
     [SerializeField] private Image ability5;
 
     [SerializeField] private Slider healthBar;
-
+    
+    [SerializeField] private GameObject abilityPanel;
+    [SerializeField] private GameObject hud;
+    
+    private int abilitySelected;
+    private List<int> abilitiesOwned = new List<int>();
+    
     private void Start()
     {
         Instance = this;
@@ -25,26 +31,33 @@ public class AbilityUIController : MonoBehaviour
         healthBar.value = currentHealth / maxHealth;
     }
 
-    public void UseAbility(int index, float length)
+    private Image IndexToImage(int index)
     {
+        Image result = null;
         switch (index)
         {
             case 1:
-                StartCoroutine(UseAbilityEnum(ability1, length));
+                result = ability1;
                 break;
             case 2:
-                StartCoroutine(UseAbilityEnum(ability2, length));
+                result = ability2;
                 break;
             case 3:
-                StartCoroutine(UseAbilityEnum(ability3, length));
+                result = ability3;
                 break;
             case 4:
-                StartCoroutine(UseAbilityEnum(ability4, length));
+                result = ability4;
                 break;
             case 5:
-                StartCoroutine(UseAbilityEnum(ability5, length));
+                result = ability5;
                 break;
         }
+        return result;
+    }
+    
+    public void UseAbility(int index, float length)
+    {
+        StartCoroutine(UseAbilityEnum(IndexToImage(index), length));
     }
 
     private IEnumerator UseAbilityEnum(Image image, float length)
@@ -60,24 +73,7 @@ public class AbilityUIController : MonoBehaviour
     
     public void CooldownAbility(int index, float cooldown)
     {
-        switch (index)
-        {
-            case 1:
-                StartCoroutine(UseCooldownEnum(ability1, cooldown));
-                break;
-            case 2:
-                StartCoroutine(UseCooldownEnum(ability2, cooldown));
-                break;
-            case 3:
-                StartCoroutine(UseCooldownEnum(ability3, cooldown));
-                break;
-            case 4:
-                StartCoroutine(UseCooldownEnum(ability4, cooldown));
-                break;
-            case 5:
-                StartCoroutine(UseCooldownEnum(ability5, cooldown));
-                break;
-        }
+        StartCoroutine(UseCooldownEnum(IndexToImage(index), cooldown));
     }
 
     private IEnumerator UseCooldownEnum(Image image, float cooldown)
@@ -94,6 +90,43 @@ public class AbilityUIController : MonoBehaviour
             yield return null;
         }
         image.transform.localScale = Vector3.right + Vector3.forward;
+    }
+
+    public IEnumerator ActivateAbilityScreen(PlayerController player)
+    {
+        Time.timeScale = 0;
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        abilityPanel.SetActive(true);
+        hud.SetActive(false);
+
+        while (abilitySelected == 0)
+        {
+            yield return null;
+        }
+
+        Debug.Log(abilitySelected);
+        
+        player.ToggleAbility(false, abilitySelected);
+        abilitySelected = 0;
+        
+        abilityPanel.SetActive(false);
+        hud.SetActive(true);
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        
+        Time.timeScale = 1;
+    }
+
+    public void OnAbilitySelected(int index)
+    {
+        if (abilitiesOwned.Contains(index))
+        {
+            return;
+        }
+        abilitySelected = index;
+        abilitiesOwned.Add(index);
     }
 
 }
