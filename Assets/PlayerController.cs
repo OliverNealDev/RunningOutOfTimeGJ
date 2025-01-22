@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterController))]
@@ -11,7 +12,7 @@ public class PlayerCharacter : MonoBehaviour
     //[SerializeField] private float runSpeed = 8f;              // Running speed
     [SerializeField] private float jumpForce = 4f;           // Force applied for jumping
     [SerializeField] private float groundCheckDistance = 1.2f;
-    [SerializeField] private LayerMask groundMask;
+    [FormerlySerializedAs("groundMask")] [SerializeField] private LayerMask groundLayer;
     private bool isGrounded;                                   // Check whether player is grounded
     private Vector3 jumpingVelocity;
 
@@ -33,20 +34,25 @@ public class PlayerCharacter : MonoBehaviour
     //Melee Ability
     private bool hasMeleeAbility = true;
     private bool activeMelee;
+    private float meleeCooldown = 5f;
     [SerializeField] private float meleeDamage = 70f;
     
     //Fireball Ability
     private bool hasFireballAbility = true;
     private bool activeFireball;
+    private float fireballCooldown = 7f;
     private GameObject fireball;
     
     //Trioball Ability
     private bool hasTrioballAbility = true;
     private bool activeTrio;
+    private float trioballCooldown = 3f;
     private GameObject trioball;
     
     //Pistol Ability
     private bool hasPistolAbility = true;
+    private bool activePistol;
+    private float pistolDamage = 85f;
 
     void Start()
     {
@@ -81,9 +87,9 @@ public class PlayerCharacter : MonoBehaviour
             StartCoroutine(AltRangedAttack());
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && hasPistolAbility)
+        if (Input.GetKey(KeyCode.Mouse0) && hasPistolAbility && !activePistol)
         {
-            
+            StartCoroutine(PistolAttack());
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -131,7 +137,7 @@ public class PlayerCharacter : MonoBehaviour
     void CheckGrounded()
     {
         // Perform ground detection using a SphereCast
-        isGrounded = Physics.CheckSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f, groundMask);
+        isGrounded = Physics.CheckSphere(transform.position - Vector3.up * groundCheckDistance, 0.5f, groundLayer);
     }
     
     private void OnDrawGizmos()
@@ -155,7 +161,8 @@ public class PlayerCharacter : MonoBehaviour
     private IEnumerator MeleeAttack()
     {
         animator.Play("Melee", 0, 0);
-
+        AbilityUIController.Instance.UseAbility(1, animator.GetCurrentAnimatorClipInfo(0).Length);
+        
         activeMelee = true;
         
         yield return new WaitForSeconds(3f / 24f);
@@ -168,33 +175,68 @@ public class PlayerCharacter : MonoBehaviour
         }
         
         yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        
+        AbilityUIController.Instance.CooldownAbility(1, meleeCooldown);
+        
+        yield return new WaitForSeconds(meleeCooldown);
+        
         activeMelee = false;
     }
     
     private IEnumerator AltRangedAttack()
     {
         animator.Play("Fireball", 0, 0);
+        AbilityUIController.Instance.UseAbility(5, animator.GetCurrentAnimatorClipInfo(0).Length);
+
         activeTrio = true;
         
         yield return new WaitForSeconds(9f / 24f);
 
         Instantiate(trioball, leftHandObject.transform.position, cameraTransform.rotation);
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
-        activeTrio = false;
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length - (9f / 24f));
         
+        AbilityUIController.Instance.CooldownAbility(5, trioballCooldown);
+        
+        yield return new WaitForSeconds(trioballCooldown);
+        
+        activeTrio = false;
     }
 
     private IEnumerator Fireball()
     {
         animator.Play("Fireball", 0, 0);
+        AbilityUIController.Instance.UseAbility(2, animator.GetCurrentAnimatorClipInfo(0).Length);
+
         activeFireball = true;
         
         yield return new WaitForSeconds(9f / 24f);
         
         Instantiate(fireball, leftHandObject.transform.position, cameraTransform.rotation);
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length - (9f / 24f));
+        
+        AbilityUIController.Instance.CooldownAbility(2, fireballCooldown);
+        
+        yield return new WaitForSeconds(fireballCooldown);
+        
         activeFireball = false;
+    }
+
+    private IEnumerator PistolAttack()
+    {
+        animator.Play("Melee", 0, 0.5f);
+        AbilityUIController.Instance.UseAbility(4, animator.GetCurrentAnimatorClipInfo(0).Length * 0.5f);
+
+        activePistol = true;
+        
+        Physics.Raycast(cameraTransform.position, cameraTransform.forward, out RaycastHit hit, 100f, enemyLayer + groundLayer);
+        if (hit.collider.TryGetComponent(out Health health))
+        {
+            health.TakeDamage(pistolDamage);
+        }
+        
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length * 0.5f);
+        activePistol = false;
     }
 }

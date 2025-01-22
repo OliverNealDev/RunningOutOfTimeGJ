@@ -7,8 +7,6 @@ public class FireAoE : MonoBehaviour
     private float tickRate = 1f;
     private float lifetime = 10f;
     
-    [SerializeField] private LayerMask interactableLayer;
-    
     private float timeWhenLastHit;
 
     private List<Health> healths = new List<Health>();

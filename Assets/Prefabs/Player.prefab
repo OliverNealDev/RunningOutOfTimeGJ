@@ -272,7 +272,7 @@ MonoBehaviour:
   walkSpeed: 7
   jumpForce: 1.5
   groundCheckDistance: 0.6
-  groundMask:
+  groundLayer:
     serializedVersion: 2
     m_Bits: 32768
   lookSensitivity: 2
@@ -295,6 +295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMealth: 100
+  isPlayer: 1
   damageNumberOffset: {x: 0, y: 1, z: 0}
 --- !u!1001 &4443089373874377472
 PrefabInstance:
