@@ -23,7 +23,7 @@ public class PauseMenu_UIController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (LevelManager.Instance?.AbilityScreenActive == false)
+            if (LevelManager.Instance?.abilityScreenActive == false)
             {
                 SwitchMenuState(MenuState.PauseMenu);
             }

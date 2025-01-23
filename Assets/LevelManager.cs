@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
-    
-    public bool AbilityScreenActive { get; private set; }
+
+    public bool abilityScreenActive;
     
     [SerializeField] private float timer = 30f;
     [SerializeField] private float timerInterval = 30f;
@@ -22,12 +23,35 @@ public class LevelManager : MonoBehaviour
     void Update()
     {
         timer -= Time.deltaTime;
+        
+        AbilityUIController.Instance.UpdateTimer(timer);
 
-        if (timer <= 0)
+        if (timer <= -5f)
         {
             timer = timerInterval;
-            AbilityScreenActive = true;
+            abilityScreenActive = true;
+            StartCoroutine(AbilityUIController.Instance.DeactivateAbilityScreen(player));
+        }
+        else if (timer >= timerInterval + 5f)
+        {
+            timer = timerInterval;
             StartCoroutine(AbilityUIController.Instance.ActivateAbilityScreen(player));
         }
+
+        //Debug
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            timer += 10f;
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            timer -= 10f;
+        }
+        //
+    }
+
+    public void EnemyDied()
+    {
+        timer += 10f;
     }
 }

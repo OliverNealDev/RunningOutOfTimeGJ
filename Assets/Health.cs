@@ -9,8 +9,8 @@ public class Health : MonoBehaviour
     [SerializeField] private bool isPlayer = false;
     
     private float timeSinceLastHit;
-    private float regenDelay = 3f;
-    private float regenRate = 10f;
+    private float regenDelay = 5f;
+    private float regenRate = 5f;
 
     private GameObject damageNumberPrefab;
     [SerializeField] private Vector3 damageNumberOffset = Vector3.up;
@@ -46,6 +46,8 @@ public class Health : MonoBehaviour
         
         if (currentHealth <= 0f)
         {
+            LevelManager.Instance.EnemyDied();
+            
             Destroy(gameObject);
         }
     }

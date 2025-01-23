@@ -3,6 +3,13 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public enum AnimationLayer
+{
+    Left = 0,
+    Right = 1,
+}
+
+
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -30,18 +37,21 @@ public class PlayerController : MonoBehaviour
     
     [SerializeField] private GameObject leftHandObject;
     
-    
     //Melee Ability
     private bool hasMeleeAbility = true;
     private bool activeMelee;
-    private float meleeCooldown = 5f;
-    [SerializeField] private float meleeDamage = 70f;
+    private float meleeCooldown = 2f;
+    private float meleeDamage = 220f;
+    [SerializeField] private AnimationClip meleeAnimation;
+    [SerializeField] private AnimationLayer meleeAnimationLayer;
     
     //Fireball Ability
     private bool hasFireballAbility = true;
     private bool activeFireball;
     private float fireballCooldown = 7f;
     private GameObject fireball;
+    [SerializeField] private AnimationClip fireballAnimation;
+    [SerializeField] private AnimationLayer fireballAnimationLayer;
     
     //Trioball Ability
     private bool hasTrioballAbility = true;
@@ -53,6 +63,18 @@ public class PlayerController : MonoBehaviour
     private bool hasPistolAbility = true;
     private bool activePistol;
     private float pistolDamage = 85f;
+    [SerializeField] private AnimationClip shootAnimation;
+    [SerializeField] private AnimationLayer shootAnimationLayer;
+    [SerializeField] private AnimationClip leftReloadAnimation;
+    [SerializeField] private AnimationClip rightReloadAnimation;
+
+    //Dash Ability
+    private bool hasDashAbility = true;
+    private bool activeDash;
+    private float dashCooldown = 2.5f;
+    private float dashForce = 20f;
+    private float dashDuration = 0.25f;
+    private Vector3 dashVelocity;
 
     void Start()
     {
@@ -79,7 +101,7 @@ public class PlayerController : MonoBehaviour
         HandleMouseLook();
         HandleJump();
         
-        if (Input.GetKeyDown(KeyCode.V) && hasMeleeAbility && !activeMelee)
+        if (Input.GetKeyDown(KeyCode.E) && hasMeleeAbility && !activeMelee)
         {
             StartCoroutine(MeleeAttack());
         }
@@ -97,6 +119,11 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility && !activeFireball)
         {
             StartCoroutine(Fireball());
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && hasDashAbility && !activeDash)
+        {
+            StartCoroutine(Dash());
         }
     }
 
@@ -166,7 +193,7 @@ public class PlayerController : MonoBehaviour
                 hasFireballAbility = active;
                 break;
             case 3:
-                
+                hasDashAbility = active;
                 break;
             case 4:
                 hasPistolAbility = active;
@@ -180,7 +207,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator MeleeAttack()
     {
         animator.Play("Melee", 0, 0);
-        AbilityUIController.Instance.UseAbility(1, animator.GetCurrentAnimatorClipInfo(0).Length);
+        AbilityUIController.Instance.UseAbility(1, meleeAnimation.length);
         
         activeMelee = true;
         
@@ -193,7 +220,7 @@ public class PlayerController : MonoBehaviour
             health.TakeDamage(meleeDamage);
         }
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length);
+        yield return new WaitForSeconds(meleeAnimation.length);
         
         AbilityUIController.Instance.CooldownAbility(1, meleeCooldown);
         
@@ -205,7 +232,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator AltRangedAttack()
     {
         animator.Play("Fireball", 0, 0);
-        AbilityUIController.Instance.UseAbility(5, animator.GetCurrentAnimatorClipInfo(0).Length);
+        AbilityUIController.Instance.UseAbility(5, fireballAnimation.length);
 
         activeTrio = true;
         
@@ -213,7 +240,7 @@ public class PlayerController : MonoBehaviour
 
         Instantiate(trioball, leftHandObject.transform.position, cameraTransform.rotation);
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length - (9f / 24f));
+        yield return new WaitForSeconds(fireballAnimation.length - (9f / 24f));
         
         AbilityUIController.Instance.CooldownAbility(5, trioballCooldown);
         
@@ -224,38 +251,87 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Fireball()
     {
+        //Play animation & tell UI to highlight icon for the duration
         animator.Play("Fireball", 0, 0);
-        AbilityUIController.Instance.UseAbility(2, animator.GetCurrentAnimatorClipInfo(0).Length);
+        AbilityUIController.Instance.UseAbility(2, fireballAnimation.length);
 
+        //Sets the fireball to active
         activeFireball = true;
         
+        //Waits for the action frame in the anim (actionFrameNumber / framerate)
         yield return new WaitForSeconds(9f / 24f);
         
+        //Does the fireball code
         Instantiate(fireball, leftHandObject.transform.position, cameraTransform.rotation);
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length - (9f / 24f));
+        //waits for the remainder of the animation
+        yield return new WaitForSeconds(fireballAnimation.length - (9f / 24f));
         
+        //Tells the UI to play the cooldown sequence
         AbilityUIController.Instance.CooldownAbility(2, fireballCooldown);
         
+        //Waits for the cooldown of the ability
         yield return new WaitForSeconds(fireballCooldown);
         
+        //Allows the fireball to be cast again
         activeFireball = false;
     }
 
     private IEnumerator PistolAttack()
     {
-        animator.Play("Melee", 0, 0.5f);
-        AbilityUIController.Instance.UseAbility(4, animator.GetCurrentAnimatorClipInfo(0).Length * 0.5f);
+        animator.Play("Shoot", 1, 0);
+        AbilityUIController.Instance.UseAbility(4, shootAnimation.length);
 
         activePistol = true;
         
-        Physics.Raycast(cameraTransform.position, cameraTransform.forward, out RaycastHit hit, 100f, enemyLayer + groundLayer);
-        if (hit.collider.TryGetComponent(out Health health))
+        if (Physics.Raycast(cameraTransform.position, cameraTransform.forward, out RaycastHit hit, 100f, enemyLayer + groundLayer) && hit.collider.TryGetComponent(out Health health))
         {
             health?.TakeDamage(pistolDamage);
         }
         
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length * 0.5f);
+        yield return new WaitForSeconds(shootAnimation.length);
+        
         activePistol = false;
+    }
+
+    private IEnumerator Dash()
+    {
+        //Play animation & tell UI to highlight icon for the duration
+        //animator.Play("Dash", 0, 0);
+        AbilityUIController.Instance.UseAbility(3, dashDuration);
+
+        //Sets the dash to active
+        activeDash = true;
+        
+        //Waits for the action frame in the anim (actionFrameNumber / framerate)
+        //yield return new WaitForSeconds(9f / 24f);
+        
+        //Does the dash code
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+        
+        Vector3 direction = (transform.right * moveX + transform.forward * moveZ).normalized;
+
+        dashVelocity = direction * dashForce;
+        
+        float dashTimer = dashDuration;
+        while (dashTimer > 0f)
+        {
+            controller.Move(dashVelocity * Time.deltaTime);
+            dashTimer -= Time.deltaTime;
+            yield return null;
+        }
+        
+        //waits for the remainder of the animation
+        //yield return new WaitForSeconds(0.5f);
+        
+        //Tells the UI to play the cooldown sequence
+        AbilityUIController.Instance.CooldownAbility(3, dashCooldown);
+        
+        //Waits for the cooldown of the ability
+        yield return new WaitForSeconds(dashCooldown);
+        
+        //Allows the dash to be cast again
+        activeDash = false;
     }
 }
