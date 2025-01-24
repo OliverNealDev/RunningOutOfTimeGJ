@@ -12,21 +12,19 @@ public class LevelManager : MonoBehaviour
     
     private PlayerController player;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Instance = this;
         player = FindObjectsByType<PlayerController>(FindObjectsSortMode.InstanceID)[0];
     }
 
-    // Update is called once per frame
     void Update()
     {
         timer -= Time.deltaTime;
         
         AbilityUIController.Instance.UpdateTimer(timer);
 
-        if (timer <= -5f)
+        if (timer <= 0f)
         {
             timer = timerInterval;
             abilityScreenActive = true;
@@ -37,21 +35,10 @@ public class LevelManager : MonoBehaviour
             timer = timerInterval;
             StartCoroutine(AbilityUIController.Instance.ActivateAbilityScreen(player));
         }
-
-        //Debug
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            timer += 10f;
-        }
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            timer -= 10f;
-        }
-        //
     }
 
     public void EnemyDied()
     {
-        timer += 10f;
+        timer += 1f;
     }
 }

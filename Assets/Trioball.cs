@@ -23,14 +23,15 @@ public class Trioball : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.forward * Time.deltaTime * projectileSpeed);
-        transform.RotateAround(transform.position, transform.forward, 250f * Time.deltaTime);
+        transform.RotateAround(transform.position, transform.forward, 720f * Time.deltaTime);
     }
 
     void OnCollisionEnter(Collision other)
     {
         if (other.collider.TryGetComponent(out Health health))
         {
-            health.TakeDamage(25f);
+            health.TakeDamage(21f);
+            health.StartElectricityEffect(5f);
         }
 
         Collider childCollider = other.GetContact(0).thisCollider;

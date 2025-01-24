@@ -54,7 +54,7 @@ public class MeleeEnemy : MonoBehaviour
     IEnumerator Attack()
     {
         Debug.Log("Enemy attacks!");
-        animator.Play("Attack", 1, 0f);
+        animator.SetTrigger("Attack");
         attackCollider.enabled = true;
         
         yield return new WaitForSeconds(attackAnim.length);

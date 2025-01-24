@@ -1,42 +1,46 @@
-using Unity.Mathematics;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemyManager : MonoBehaviour
 {
-    public GameObject meleeEnemyPrefab;
+    [SerializeField] List<GameObject> enemies = new List<GameObject>();
+    [SerializeField] private float spawnDistance = 22f;
+    [SerializeField] private float spawnRate;
+    [SerializeField] private float minSpawnRate;
+    [SerializeField] private float spawnRateDecrement;
+    [SerializeField] private int decrementAfterXEnemies;
     
-    public GameObject rangedEnemyPrefab;
-    public GameObject stomperEnemyPrefab; // does these stomps or attacks that hit everything around it?
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private float spawnedEnemies;
+
+    private void Start()
     {
-        // test
+        if (enemies.Count == 0)
+        {
+            Debug.LogWarning("No enemies found");
+        }
+        else
+        {
+            InvokeRepeating(nameof(SpawnEnemies), 0, spawnRate);
+        }
     }
 
-    // Update is called once per frame
-    void SpawnRoundOne()
+    private void SpawnEnemies()
     {
-        Instantiate(meleeEnemyPrefab, transform.position, quaternion.identity);
-    }
-    
-    void SpawnRoundTwo()
-    {
-        Instantiate(meleeEnemyPrefab, transform.position, quaternion.identity);
-    }
-    
-    void SpawnRoundThree()
-    {
-        Instantiate(meleeEnemyPrefab, transform.position, quaternion.identity);
-    }
-    
-    void SpawnRoundFour()
-    {
-        Instantiate(meleeEnemyPrefab, transform.position, quaternion.identity);
-    }
-    
-    void SpawnRoundFive()
-    {
-        Instantiate(meleeEnemyPrefab, transform.position, quaternion.identity);
+        Vector3 spawnLocation = Random.insideUnitSphere * spawnDistance;
+        
+        spawnLocation.y = 0f;
+        
+        GameObject enemy = Instantiate(enemies[Random.Range(0, enemies.Count)], spawnLocation, Quaternion.identity);
+        
+        spawnedEnemies++;
+
+        if (spawnedEnemies % decrementAfterXEnemies == 0 && spawnRate > minSpawnRate)
+        {
+            spawnRate -= spawnRateDecrement;
+            CancelInvoke(nameof(SpawnEnemies));
+            InvokeRepeating(nameof(SpawnEnemies), spawnRate, spawnRate);
+        }
     }
 }

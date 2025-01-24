@@ -9,7 +9,7 @@ public enum AnimationLayer
     Right = 1,
 }
 
-
+[RequireComponent(typeof(Health))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;                                      // Rigidbody for physics-based movement
     private Transform cameraTransform;                         // Reference to the player's camera
     private Animator animator;
+    private Health health;
     
     [SerializeField] private LayerMask enemyLayer;
     
@@ -44,12 +45,14 @@ public class PlayerController : MonoBehaviour
     private float meleeDamage = 220f;
     [SerializeField] private AnimationClip meleeAnimation;
     [SerializeField] private AnimationLayer meleeAnimationLayer;
+
+    private bool activeAbility;
     
     //Fireball Ability
     private bool hasFireballAbility = true;
     private bool activeFireball;
     private float fireballCooldown = 7f;
-    private GameObject fireball;
+    [SerializeField] private GameObject fireball;
     [SerializeField] private AnimationClip fireballAnimation;
     [SerializeField] private AnimationLayer fireballAnimationLayer;
     
@@ -57,7 +60,7 @@ public class PlayerController : MonoBehaviour
     private bool hasTrioballAbility = true;
     private bool activeTrio;
     private float trioballCooldown = 3f;
-    private GameObject trioball;
+    [SerializeField] private GameObject trioball;
     
     //Pistol Ability
     private bool hasPistolAbility = true;
@@ -83,9 +86,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         cameraTransform = Camera.main.transform;
         animator = GetComponentInChildren<Animator>();
-
-        fireball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Fireball.prefab");
-        trioball = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Trioball.prefab");
+        health = GetComponent<Health>();
 
         // Lock cursor for FPS-style camera controls
         Cursor.lockState = CursorLockMode.Locked;
@@ -101,12 +102,12 @@ public class PlayerController : MonoBehaviour
         HandleMouseLook();
         HandleJump();
         
-        if (Input.GetKeyDown(KeyCode.E) && hasMeleeAbility && !activeMelee)
+        if (Input.GetKeyDown(KeyCode.E) && hasMeleeAbility && !activeMelee && !activeAbility)
         {
             StartCoroutine(MeleeAttack());
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse1) && hasTrioballAbility && !activeTrio)
+        if (Input.GetKeyDown(KeyCode.Mouse1) && hasTrioballAbility && !activeTrio && !activeAbility)
         {
             StartCoroutine(AltRangedAttack());
         }
@@ -116,7 +117,7 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(PistolAttack());
         }
         
-        if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility && !activeFireball)
+        if (Input.GetKeyDown(KeyCode.Q) && hasFireballAbility && !activeFireball && !activeAbility)
         {
             StartCoroutine(Fireball());
         }
@@ -206,10 +207,11 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator MeleeAttack()
     {
+        activeMelee = true;
+        activeAbility = true;
+        
         animator.Play("Melee", 0, 0);
         AbilityUIController.Instance.UseAbility(1, meleeAnimation.length);
-        
-        activeMelee = true;
         
         yield return new WaitForSeconds(3f / 24f);
         
@@ -219,10 +221,16 @@ public class PlayerController : MonoBehaviour
             hit.collider.TryGetComponent(out Health health);
             health.TakeDamage(meleeDamage);
         }
+
+        if (hits.Length > 0)
+        {
+            health.Heal(30f);
+        }
         
         yield return new WaitForSeconds(meleeAnimation.length);
         
         AbilityUIController.Instance.CooldownAbility(1, meleeCooldown);
+        activeAbility = false;
         
         yield return new WaitForSeconds(meleeCooldown);
         
@@ -231,11 +239,12 @@ public class PlayerController : MonoBehaviour
     
     private IEnumerator AltRangedAttack()
     {
+        activeTrio = true;
+        activeAbility = true;
+        
         animator.Play("Fireball", 0, 0);
         AbilityUIController.Instance.UseAbility(5, fireballAnimation.length);
 
-        activeTrio = true;
-        
         yield return new WaitForSeconds(9f / 24f);
 
         Instantiate(trioball, leftHandObject.transform.position, cameraTransform.rotation);
@@ -243,6 +252,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(fireballAnimation.length - (9f / 24f));
         
         AbilityUIController.Instance.CooldownAbility(5, trioballCooldown);
+        activeAbility = false;
         
         yield return new WaitForSeconds(trioballCooldown);
         
@@ -251,12 +261,13 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Fireball()
     {
+        //Sets the fireball to active
+        activeFireball = true;
+        activeAbility = true;
+
         //Play animation & tell UI to highlight icon for the duration
         animator.Play("Fireball", 0, 0);
         AbilityUIController.Instance.UseAbility(2, fireballAnimation.length);
-
-        //Sets the fireball to active
-        activeFireball = true;
         
         //Waits for the action frame in the anim (actionFrameNumber / framerate)
         yield return new WaitForSeconds(9f / 24f);
@@ -269,6 +280,7 @@ public class PlayerController : MonoBehaviour
         
         //Tells the UI to play the cooldown sequence
         AbilityUIController.Instance.CooldownAbility(2, fireballCooldown);
+        activeAbility = false;
         
         //Waits for the cooldown of the ability
         yield return new WaitForSeconds(fireballCooldown);

@@ -50,14 +50,10 @@ public class AbilityUIController : MonoBehaviour
             abilitiesOwned.Add(i + 1);
         }
     }
-
-    void Update()
-    {
-    }
     
     public void UpdateTimer(float time)
     {
-        if (time <= 0)
+        if (time <= 5)
         {
             timer.color = Color.red;
         }
