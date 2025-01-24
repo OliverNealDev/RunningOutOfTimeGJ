@@ -287,6 +287,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3e7c04c4df0c5428d551bad3584e4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultMusic: {fileID: 0}
-  level1Music: {fileID: 0}
+  defaultMusic: {fileID: 8300000, guid: 032654c7b6223454c81e66d2c3a7048b, type: 3}
+  level1Music: {fileID: 8300000, guid: ebb517cc6c699c0499290800e5a4fbbc, type: 3}
   level2Music: {fileID: 0}

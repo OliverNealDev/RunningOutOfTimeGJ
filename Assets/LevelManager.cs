@@ -10,12 +10,16 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private float timer = 30f;
     [SerializeField] private float timerInterval = 30f;
     
+    [SerializeField] private AudioClip levelMusic;
+    
     private PlayerController player;
     
     void Start()
     {
         Instance = this;
         player = FindObjectsByType<PlayerController>(FindObjectsSortMode.InstanceID)[0];
+        
+        AudioManager.Instance.PlaySong(levelMusic);
     }
 
     void Update()

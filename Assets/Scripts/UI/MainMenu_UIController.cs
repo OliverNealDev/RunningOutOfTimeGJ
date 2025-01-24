@@ -2,6 +2,7 @@
 using UnityEditor;
 #endif
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,6 +11,8 @@ public class MainMenu_UIController : MonoBehaviour
 {
     private enum MenuState { None, MainMenu, OptionsMenu }
     private MenuState currentMenuState;
+
+    [SerializeField] private AudioClip hellschampiondotwav;
 
     public GameObject MainMenu;
     public GameObject LevelSelectionMenu;
@@ -20,11 +23,23 @@ public class MainMenu_UIController : MonoBehaviour
 
     private void Start()
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         SwitchMenuState(MenuState.MainMenu);
     }
 
+    private Coroutine play;
     public void OnPlayButtonClicked()
     {
+        play = StartCoroutine(Play());
+    }
+
+    private IEnumerator Play()
+    {
+        AudioManager.Instance.sfxSource.PlayOneShot(hellschampiondotwav);
+        
+        yield return new WaitForSeconds(hellschampiondotwav.length);
+        
         SceneManager.LoadScene("SampleScene");
     }
     public void OptionsButtonClicked()

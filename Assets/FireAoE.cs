@@ -29,7 +29,7 @@ public class FireAoE : MonoBehaviour
             //This is the silly num check that's tells me to do a null check
             if (health != null)
             {
-                health.TakeDamage(10f);
+                health.TakeDamage(25f);
             }
         }
     }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class Health : MonoBehaviour
 {
@@ -11,6 +13,9 @@ public class Health : MonoBehaviour
 
     [SerializeField] private bool isPlayer = false;
     [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private List<AudioClip> hitSounds = new();
     
     private float timeSinceLastHit;
     private float regenDelay = 5f;
@@ -27,6 +32,7 @@ public class Health : MonoBehaviour
         damageNumberPrefab = Resources.Load("DamageNumbers") as GameObject;
         
         if (animator == null) animator = gameObject.GetComponent<Animator>();
+        if (audioSource == null) audioSource = gameObject.GetComponent<AudioSource>();
     }
 
     void Update()
@@ -47,6 +53,11 @@ public class Health : MonoBehaviour
     {
         currentHealth -= damage;
         if (isPlayer) AbilityUIController.Instance.UpdateHealth(currentHealth, maxMealth);
+
+        if (hitSounds.Count > 0)
+        {
+            audioSource.PlayOneShot(hitSounds[Random.Range(0, hitSounds.Count)], AudioManager.Instance.sfxSource.volume);
+        }
 
         if (animator != null)
         {
@@ -103,7 +114,7 @@ public class Health : MonoBehaviour
         for (int i = 0; i < tickAmount; i++)
         {
             yield return new WaitForSeconds(0.5f);
-            TakeDamage(maxMealth * 0.07f);
+            TakeDamage(maxMealth * 0.085f);
         }
         electricityCoroutine = null;
     }

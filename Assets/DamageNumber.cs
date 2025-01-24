@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -55,7 +56,7 @@ public class DamageNumber : MonoBehaviour
     void SetDamage(float damage)
     {
         this.damage = damage;
-        text.text = damage.ToString();
+        text.text = Mathf.Floor(damage).ToString();
     }
 
     void LateUpdate()

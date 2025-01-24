@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour
     private Transform cameraTransform;                         // Reference to the player's camera
     private Animator animator;
     private Health health;
+    private AudioSource audioSource;
     
     [SerializeField] private LayerMask enemyLayer;
     
@@ -45,6 +47,8 @@ public class PlayerController : MonoBehaviour
     private float meleeDamage = 220f;
     [SerializeField] private AnimationClip meleeAnimation;
     [SerializeField] private AnimationLayer meleeAnimationLayer;
+    [SerializeField] private List<AudioClip> meleeSounds = new ();
+
 
     private bool activeAbility;
     
@@ -55,12 +59,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject fireball;
     [SerializeField] private AnimationClip fireballAnimation;
     [SerializeField] private AnimationLayer fireballAnimationLayer;
+    [SerializeField] private List<AudioClip> fireballSounds = new ();
+
     
     //Trioball Ability
     private bool hasTrioballAbility = true;
     private bool activeTrio;
     private float trioballCooldown = 3f;
     [SerializeField] private GameObject trioball;
+    [SerializeField] private List<AudioClip> trioballSounds = new ();
+
     
     //Pistol Ability
     private bool hasPistolAbility = true;
@@ -70,6 +78,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AnimationLayer shootAnimationLayer;
     [SerializeField] private AnimationClip leftReloadAnimation;
     [SerializeField] private AnimationClip rightReloadAnimation;
+    [SerializeField] private List<AudioClip> gunshotSounds = new ();
 
     //Dash Ability
     private bool hasDashAbility = true;
@@ -87,6 +96,7 @@ public class PlayerController : MonoBehaviour
         cameraTransform = Camera.main.transform;
         animator = GetComponentInChildren<Animator>();
         health = GetComponent<Health>();
+        audioSource = GetComponent<AudioSource>();
 
         // Lock cursor for FPS-style camera controls
         Cursor.lockState = CursorLockMode.Locked;
@@ -212,14 +222,17 @@ public class PlayerController : MonoBehaviour
         
         animator.Play("Melee", 0, 0);
         AbilityUIController.Instance.UseAbility(1, meleeAnimation.length);
+        audioSource.PlayOneShot(meleeSounds[Random.Range(0, meleeSounds.Count)], AudioManager.Instance.sfxSource.volume * 1f);
         
         yield return new WaitForSeconds(3f / 24f);
         
-        RaycastHit[] hits = Physics.SphereCastAll(cameraTransform.position, 1f, Vector3.forward, 1f, enemyLayer);
+        RaycastHit[] hits = Physics.SphereCastAll(cameraTransform.position, 1f, cameraTransform.forward * 1.5f, 1f, enemyLayer);
         foreach (RaycastHit hit in hits)
         {
-            hit.collider.TryGetComponent(out Health health);
-            health.TakeDamage(meleeDamage);
+            if (hit.collider.TryGetComponent(out Health health))
+            {
+                health.TakeDamage(meleeDamage);
+            }
         }
 
         if (hits.Length > 0)
@@ -246,6 +259,8 @@ public class PlayerController : MonoBehaviour
         AbilityUIController.Instance.UseAbility(5, fireballAnimation.length);
 
         yield return new WaitForSeconds(9f / 24f);
+        audioSource.PlayOneShot(trioballSounds[Random.Range(0, trioballSounds.Count)], AudioManager.Instance.sfxSource.volume * 1f);
+
 
         Instantiate(trioball, leftHandObject.transform.position, cameraTransform.rotation);
         
@@ -271,6 +286,7 @@ public class PlayerController : MonoBehaviour
         
         //Waits for the action frame in the anim (actionFrameNumber / framerate)
         yield return new WaitForSeconds(9f / 24f);
+        audioSource.PlayOneShot(fireballSounds[Random.Range(0, fireballSounds.Count)], AudioManager.Instance.sfxSource.volume * 1f);
         
         //Does the fireball code
         Instantiate(fireball, leftHandObject.transform.position, cameraTransform.rotation);
@@ -293,6 +309,8 @@ public class PlayerController : MonoBehaviour
     {
         animator.Play("Shoot", 1, 0);
         AbilityUIController.Instance.UseAbility(4, shootAnimation.length);
+        
+        audioSource.PlayOneShot(gunshotSounds[Random.Range(0, gunshotSounds.Count)], AudioManager.Instance.sfxSource.volume * 1f);
 
         activePistol = true;
         

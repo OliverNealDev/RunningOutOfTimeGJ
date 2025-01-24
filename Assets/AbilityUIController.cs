@@ -20,6 +20,8 @@ public class AbilityUIController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI timer;
     
+    [SerializeField] private TextMeshProUGUI gameTimer;
+    
     [SerializeField] private int abilityesAmount = 5;
     
     [SerializeField] private Image ability1;
@@ -66,6 +68,11 @@ public class AbilityUIController : MonoBehaviour
             timer.color = Color.white;
         }
         timer.text = time.ToString("0.00");
+        
+        int mins = (int)(Time.time / 60f);
+        float secs = Time.time % 60f;
+        
+        gameTimer.text = "Time: " + mins + ":" + secs.ToString("00.00");
     }
 
     public void UpdateHealth(float currentHealth, float maxHealth)
@@ -148,6 +155,8 @@ public class AbilityUIController : MonoBehaviour
             Cursor.visible = true;
         
             abilityPanel.SetActive(true);
+
+            yield return new WaitForSecondsRealtime(2f);
             
             while (true)
             {
