@@ -11,8 +11,14 @@ public class FireAoE : MonoBehaviour
 
     private List<Health> healths = new List<Health>();
     
+    private AudioSource audioSource;
+    
     void Start()
     {
+        /*audioSource = GetComponent<AudioSource>();
+        audioSource.volume = AudioManager.Instance.sfxSource.volume;
+        audioSource.Play();*/
+        
         Invoke(nameof(Timeout), lifetime);
         InvokeRepeating(nameof(ApplyDamage), 0, tickRate);
     }

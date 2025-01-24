@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.VFX;
 using Random = UnityEngine.Random;
 
 public class Health : MonoBehaviour
@@ -20,6 +21,8 @@ public class Health : MonoBehaviour
     private float timeSinceLastHit;
     private float regenDelay = 5f;
     private float regenRate = 5f;
+    
+    [SerializeField] private VisualEffectAsset electricityEffect;
 
     private GameObject damageNumberPrefab;
     [SerializeField] private Vector3 damageNumberOffset = Vector3.up;
@@ -98,6 +101,7 @@ public class Health : MonoBehaviour
     }
 
     Coroutine electricityCoroutine;
+    VisualEffect activeElectricityEffect;
     public void StartElectricityEffect(float duration)
     {
         if (electricityCoroutine != null)
@@ -109,6 +113,13 @@ public class Health : MonoBehaviour
 
     private IEnumerator ElectricityEffect(float duration)
     {
+        if (activeElectricityEffect == null)
+        {
+            activeElectricityEffect = gameObject.AddComponent<VisualEffect>();
+            activeElectricityEffect.visualEffectAsset = electricityEffect;
+            activeElectricityEffect.SetFloat("Speed", 6);
+        }
+        
         int tickAmount = (int)(duration / 0.5f);
 
         for (int i = 0; i < tickAmount; i++)
@@ -117,6 +128,7 @@ public class Health : MonoBehaviour
             TakeDamage(maxMealth * 0.085f);
         }
         electricityCoroutine = null;
+        Destroy(activeElectricityEffect);
+        activeElectricityEffect = null;
     }
-    
 }

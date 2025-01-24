@@ -2176,6 +2176,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 43d15476d91174249bae30fcf3e5b82a, type: 3}
   - {fileID: 8300000, guid: fc0e8737526bdd848bbc621eb40e4fe1, type: 3}
   - {fileID: 8300000, guid: a2777743e40c7c84fa870826ebc42b6b, type: 3}
+  electricityEffect: {fileID: 8926484042661614526, guid: ac7e61b7530e3744fab9a7d38f78acad, type: 3}
   damageNumberOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &744014269745371268
 MonoBehaviour:
